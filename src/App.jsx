@@ -19,16 +19,68 @@ import OrderDetail from './pages/Orders/OrderDetail';
 import CategoryManagement from './pages/Categories/CategoryManagement';
 
 const Layout = ({ children }) => {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const layoutContainerStyle = {
+    minHeight: '100vh',
+    backgroundColor: '#F9FAFB',
+    display: 'flex',
+    position: 'relative',
+  };
+
+  const mainContentWrapperStyle = {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+    marginLeft: isMobile ? '0' : '280px',
+    transition: 'margin-left 0.3s ease-in-out',
+  };
+
+  const headerContainerStyle = {
+    position: 'sticky',
+    top: 0,
+    zIndex: 30,
+    backgroundColor: '#ffffff',
+    borderBottom: '1px solid #e5e7eb',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+  };
+
+  const mainContentStyle = {
+    flex: 1,
+    width: '100%',
+    padding: '24px 16px',
+  };
+
+  const contentInnerStyle = {
+    maxWidth: '1600px',
+    margin: '0 auto',
+    width: '100%',
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div style={layoutContainerStyle}>
+      {/* Sidebar - handles its own mobile/desktop rendering */}
       <Sidebar />
-      <div className="md:pl-64 flex flex-col flex-1">
-        <Header />
-        <main className="flex-1">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {children}
-            </div>
+
+      {/* Main Content Area */}
+      <div style={mainContentWrapperStyle}>
+        <div style={headerContainerStyle}>
+          <Header />
+        </div>
+        <main style={mainContentStyle}>
+          <div style={contentInnerStyle}>
+            {children}
           </div>
         </main>
       </div>

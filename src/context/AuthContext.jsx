@@ -30,14 +30,25 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authAPI.login({ email, password });
-      const { token, user: userData } = response.data;
+
+      // Handle both response structures: response.data.data and response.data
+      const responseData = response.data?.data || response.data;
+      const { token, accessToken, user: userData } = responseData;
+
+      // Use either token or accessToken
+      const authToken = token || accessToken;
+
+      // Validate response
+      if (!authToken || !userData) {
+        throw new Error('Invalid response from server');
+      }
 
       // Check if user has admin role
       if (!['admin', 'superadmin'].includes(userData.role)) {
         throw new Error('Unauthorized. Admin access required.');
       }
 
-      localStorage.setItem('adminToken', token);
+      localStorage.setItem('adminToken', authToken);
       localStorage.setItem('adminUser', JSON.stringify(userData));
       setUser(userData);
 

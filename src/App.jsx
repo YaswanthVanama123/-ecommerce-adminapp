@@ -17,6 +17,7 @@ import EditProduct from './pages/Products/EditProduct';
 import OrderList from './pages/Orders/OrderList';
 import OrderDetail from './pages/Orders/OrderDetail';
 import CategoryManagement from './pages/Categories/CategoryManagement';
+import BannerManagement from './pages/Banners/BannerManagement';
 
 const Layout = ({ children }) => {
   const [isMobile, setIsMobile] = React.useState(false);
@@ -163,6 +164,16 @@ function App() {
               <PrivateRoute>
                 <Layout>
                   <CategoryManagement />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/banners"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <BannerManagement />
                 </Layout>
               </PrivateRoute>
             }

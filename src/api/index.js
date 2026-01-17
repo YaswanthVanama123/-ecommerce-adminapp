@@ -43,10 +43,23 @@ export const analyticsAPI = {
   getTopProducts: () => axiosInstance.get('/analytics/top-products'),
 };
 
+// Banners APIs
+export const bannersAPI = {
+  getAll: (params) => axiosInstance.get('/banners', { params }),
+  getById: (id) => axiosInstance.get(`/banners/${id}`),
+  create: (data) => axiosInstance.post('/banners', data),
+  update: (id, data) => axiosInstance.put(`/banners/${id}`, data),
+  delete: (id) => axiosInstance.delete(`/banners/${id}`),
+  uploadImage: (formData) => axiosInstance.post('/banners/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+};
+
 export default {
   auth: authAPI,
   products: productsAPI,
   orders: ordersAPI,
   categories: categoriesAPI,
   analytics: analyticsAPI,
+  banners: bannersAPI,
 };

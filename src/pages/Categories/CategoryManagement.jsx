@@ -497,11 +497,13 @@ const CategoryManagement = () => {
         {/* Categories Grid */}
         {filteredCategories.length === 0 ? (
           <div className="empty-state" style={{
-            background: 'rgba(255, 255, 255, 0.98)',
-            borderRadius: '20px',
-            padding: '4rem 2rem',
+            background: 'white',
+            borderRadius: '12px',
+            padding: '64px 24px',
             textAlign: 'center',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)'
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+            border: '1px solid #e2e8f0',
+            animation: 'fadeInScale 0.5s ease-out'
           }}>
             <div style={{
               display: 'inline-flex',
@@ -510,25 +512,27 @@ const CategoryManagement = () => {
               width: '80px',
               height: '80px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
-              marginBottom: '1.5rem'
+              backgroundColor: '#f1f5f9',
+              marginBottom: '24px',
+              animation: 'scaleIn 0.6s ease-out 0.2s backwards'
             }}>
               <FontAwesomeIcon icon={faFolderOpen} style={{
-                fontSize: '2.5rem',
-                color: '#667eea',
-                opacity: 0.5
+                fontSize: '40px',
+                color: '#94a3b8'
               }} />
             </div>
             <h3 style={{
-              fontSize: '1.5rem',
+              fontSize: '20px',
               fontWeight: '600',
-              color: '#374151',
-              marginBottom: '0.5rem'
-            }}>{searchTerm ? 'No Categories Found' : 'No Categories Yet'}</h3>
+              color: '#0f172a',
+              margin: '0 0 12px 0',
+              letterSpacing: '-0.025em'
+            }}>{searchTerm ? 'No categories found' : 'No categories yet'}</h3>
             <p style={{
-              color: '#6b7280',
-              fontSize: '1rem',
-              marginBottom: '2rem'
+              color: '#64748b',
+              fontSize: '15px',
+              margin: '0 0 32px 0',
+              lineHeight: '1.5'
             }}>{searchTerm
                 ? `No categories match your search "${searchTerm}"`
                 : 'Get started by creating your first category'
@@ -537,27 +541,35 @@ const CategoryManagement = () => {
               <button
                 onClick={handleAdd}
                 style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: '#3b82f6',
                   color: 'white',
-                  padding: '0.875rem 1.75rem',
-                  borderRadius: '10px',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
                   border: 'none',
                   cursor: 'pointer',
                   fontWeight: '600',
-                  fontSize: '1rem',
-                  boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)',
-                  transition: 'all 0.3s ease'
+                  fontSize: '14px',
+                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                  transition: 'all 0.2s ease'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(102, 126, 234, 0.5)';
+                  e.currentTarget.style.backgroundColor = '#2563eb';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
                 }}
                 onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#3b82f6';
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(102, 126, 234, 0.4)';
+                  e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
                 }}
               >
-                Create First Category
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+                  <path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Add Your First Category
               </button>
             )}
           </div>
@@ -700,28 +712,31 @@ const CategoryManagement = () => {
                     onClick={() => handleDelete(category._id)}
                     style={{
                       flex: 1,
-                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                      backgroundColor: '#ef4444',
                       color: 'white',
                       padding: '0.75rem 1rem',
-                      borderRadius: '10px',
+                      borderRadius: '8px',
                       border: 'none',
                       cursor: 'pointer',
                       fontWeight: '600',
-                      fontSize: '0.875rem',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+                      fontSize: '0.813rem',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '0.5rem'
+                      gap: '0.5rem',
+                      minHeight: '44px'
                     }}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 6px 18px rgba(239, 68, 68, 0.4)';
+                      e.currentTarget.style.backgroundColor = '#dc2626';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 6px rgba(239, 68, 68, 0.3)';
                     }}
                     onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = '#ef4444';
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
+                      e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)';
                     }}
                   >
                     <FontAwesomeIcon icon={faTrash} />
@@ -1050,6 +1065,28 @@ const CategoryManagement = () => {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            transform: scale(0);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
           }
         }
 

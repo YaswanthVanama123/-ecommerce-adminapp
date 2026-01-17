@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = () => {
   const location = useLocation();
+  const { user } = useAuth();
   const [hoveredItem, setHoveredItem] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -25,6 +27,7 @@ const Sidebar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Build navigation items - Banners menu is only visible to superadmin
   const navigation = [
     {
       name: 'Dashboard',
@@ -74,6 +77,18 @@ const Sidebar = () => {
         </svg>
       )
     },
+    // Banners menu item - superadmin only access
+    ...(user?.role === 'superadmin' ? [{
+      name: 'Banners',
+      href: '/banners',
+      badge: null,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+          <polyline points="17 2 12 7 7 2"></polyline>
+        </svg>
+      )
+    }] : []),
   ];
 
   const isActive = (path) => {

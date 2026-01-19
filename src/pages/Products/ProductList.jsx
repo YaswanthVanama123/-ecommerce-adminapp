@@ -487,23 +487,30 @@ const ProductList = () => {
                     }}>
                       {(() => {
                         const stockValue = getStockValue(product.stock);
+                        const lowThreshold = product.lowStockThreshold || 10;
+                        const reorderPoint = product.reorderPoint || 20;
                         let bgColor, textColor, statusText, dotColor;
 
-                        if (stockValue > 10) {
-                          bgColor = '#dcfce7';
-                          textColor = '#14532d';
-                          dotColor = '#16a34a';
-                          statusText = 'In Stock';
-                        } else if (stockValue > 0) {
-                          bgColor = '#fef3c7';
-                          textColor = '#78350f';
-                          dotColor = '#f59e0b';
-                          statusText = 'Low Stock';
-                        } else {
+                        if (stockValue === 0) {
                           bgColor = '#fee2e2';
                           textColor = '#7f1d1d';
                           dotColor = '#dc2626';
                           statusText = 'Out of Stock';
+                        } else if (stockValue <= lowThreshold) {
+                          bgColor = '#fef3c7';
+                          textColor = '#78350f';
+                          dotColor = '#f59e0b';
+                          statusText = 'Low Stock';
+                        } else if (stockValue <= reorderPoint) {
+                          bgColor = '#dbeafe';
+                          textColor = '#1e3a8a';
+                          dotColor = '#3b82f6';
+                          statusText = 'Reorder';
+                        } else {
+                          bgColor = '#dcfce7';
+                          textColor = '#14532d';
+                          dotColor = '#16a34a';
+                          statusText = 'In Stock';
                         }
 
                         return (
@@ -539,6 +546,15 @@ const ProductList = () => {
                             }}>
                               Qty: {stockValue}
                             </span>
+                            {stockValue <= reorderPoint && stockValue > 0 && (
+                              <span style={{
+                                fontSize: '11px',
+                                color: '#f59e0b',
+                                fontWeight: '500'
+                              }}>
+                                Threshold: {lowThreshold}
+                              </span>
+                            )}
                           </div>
                         );
                       })()}

@@ -7,10 +7,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import PrivateRoute from './routes/PrivateRoute';
 import Sidebar from './components/common/Sidebar';
 import Header from './components/common/Header';
+import ErrorBoundary from './components/ErrorBoundary';
+
+// Error logging
+import { initErrorLogging } from './utils/errorLogger';
 
 // Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import EnhancedDashboard from './pages/EnhancedDashboard';
 import Analytics from './pages/Analytics';
 import ProductList from './pages/Products/ProductList';
 import AddProduct from './pages/Products/AddProduct';
@@ -26,6 +31,13 @@ import ReturnDetail from './pages/Returns/ReturnDetail';
 import ReviewModeration from './pages/Reviews/ReviewModeration';
 import InvoiceManagement from './pages/Invoices/InvoiceManagement';
 import PaymentManagement from './pages/Payments/PaymentManagement';
+import CustomerList from './pages/CustomerList';
+import CustomerDetail from './pages/CustomerDetail';
+import InventoryManagement from './pages/InventoryManagement';
+import CouponManagement from './pages/CouponManagement';
+import Reports from './pages/Reports';
+import NotFound from './pages/NotFound';
+import ServerError from './pages/ServerError';
 
 const Layout = ({ children }) => {
   const [isMobile, setIsMobile] = React.useState(false);
@@ -98,10 +110,16 @@ const Layout = ({ children }) => {
 };
 
 function App() {
+  // Initialize error logging on app mount
+  React.useEffect(() => {
+    initErrorLogging();
+  }, []);
+
   return (
-    <Router>
-      <AuthProvider>
-        <Routes>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
 
@@ -111,7 +129,7 @@ function App() {
             element={
               <PrivateRoute>
                 <Layout>
-                  <Dashboard />
+                  <EnhancedDashboard />
                 </Layout>
               </PrivateRoute>
             }
@@ -267,9 +285,58 @@ function App() {
             }
           />
 
+          {/* Inventory Management Routes */}
+          <Route
+            path="/inventory"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <InventoryManagement />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+
+          {/* Reports Routes */}
+          <Route
+            path="/reports"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <Reports />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+
+          {/* Customer Management Routes */}
+          <Route
+            path="/customers"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <CustomerList />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/customers/:id"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <CustomerDetail />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+
+          {/* Error Routes */}
+          <Route path="/error" element={<ServerError />} />
+
           {/* Default Redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
 
         <ToastContainer
@@ -283,8 +350,9 @@ function App() {
           draggable
           pauseOnHover
         />
-      </AuthProvider>
-    </Router>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

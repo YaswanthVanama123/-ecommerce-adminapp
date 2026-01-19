@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import LowStockNotification from '../LowStockNotification';
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -9,8 +10,6 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [notificationCount] = useState(3);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -211,30 +210,6 @@ const Header = () => {
     position: 'relative',
   };
 
-  const notificationButtonStyle = {
-    ...quickActionButtonStyle,
-    position: 'relative',
-  };
-
-  const notificationBadgeStyle = {
-    position: 'absolute',
-    top: '6px',
-    right: '6px',
-    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    color: '#ffffff',
-    borderRadius: '10px',
-    minWidth: '18px',
-    height: '18px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '11px',
-    fontWeight: '700',
-    padding: '0 5px',
-    border: '2px solid #1e293b',
-    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)',
-  };
-
   const dividerStyle = {
     width: '1px',
     height: '32px',
@@ -311,14 +286,6 @@ const Header = () => {
     overflow: 'hidden',
     display: showUserMenu ? 'block' : 'none',
     animation: showUserMenu ? 'fadeIn 0.2s ease' : 'none',
-  };
-
-  const notificationDropdownStyle = {
-    ...dropdownMenuStyle,
-    display: showNotifications ? 'block' : 'none',
-    minWidth: '320px',
-    maxHeight: '400px',
-    overflowY: 'auto',
   };
 
   const dropdownItemStyle = {
@@ -411,31 +378,6 @@ const Header = () => {
     transition: 'all 0.2s ease',
   };
 
-  const notificationItemStyle = {
-    padding: '16px 20px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  };
-
-  const notificationTitleStyle = {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: '4px',
-  };
-
-  const notificationTextStyle = {
-    fontSize: '13px',
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginBottom: '6px',
-  };
-
-  const notificationTimeStyle = {
-    fontSize: '12px',
-    color: 'rgba(255, 255, 255, 0.5)',
-  };
-
   // Media query for mobile
   const mediaQuery = window.matchMedia('(max-width: 768px)');
   const isMobile = mediaQuery.matches;
@@ -523,89 +465,8 @@ const Header = () => {
                 📊
               </button>
 
-              {/* Notification Bell */}
-              <div style={{ position: 'relative' }}>
-                <button
-                  style={notificationButtonStyle}
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                  title="Notifications"
-                >
-                  🔔
-                  {notificationCount > 0 && (
-                    <span style={notificationBadgeStyle}>{notificationCount}</span>
-                  )}
-                </button>
-
-                {/* Notifications Dropdown */}
-                <div style={notificationDropdownStyle}>
-                  <div style={{
-                    padding: '16px 20px',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}>
-                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#ffffff' }}>
-                      Notifications
-                    </span>
-                    <span style={{
-                      fontSize: '12px',
-                      color: '#3b82f6',
-                      cursor: 'pointer',
-                      fontWeight: '500',
-                    }}>
-                      Mark all read
-                    </span>
-                  </div>
-                  <div
-                    style={notificationItemStyle}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    <div style={notificationTitleStyle}>New user registered</div>
-                    <div style={notificationTextStyle}>John Doe just created an account</div>
-                    <div style={notificationTimeStyle}>5 minutes ago</div>
-                  </div>
-                  <div
-                    style={notificationItemStyle}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    <div style={notificationTitleStyle}>System update</div>
-                    <div style={notificationTextStyle}>New features are now available</div>
-                    <div style={notificationTimeStyle}>1 hour ago</div>
-                  </div>
-                  <div
-                    style={notificationItemStyle}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    <div style={notificationTitleStyle}>Report generated</div>
-                    <div style={notificationTextStyle}>Monthly analytics report is ready</div>
-                    <div style={notificationTimeStyle}>3 hours ago</div>
-                  </div>
-                </div>
-              </div>
+              {/* Low Stock Notification Bell */}
+              <LowStockNotification />
             </div>
 
             <div style={dividerStyle}></div>
@@ -777,20 +638,7 @@ const Header = () => {
             }}
           >
             <span>🔔</span>
-            <span>Notifications</span>
-            {notificationCount > 0 && (
-              <span style={{
-                marginLeft: 'auto',
-                background: '#ef4444',
-                color: '#ffffff',
-                borderRadius: '10px',
-                padding: '2px 8px',
-                fontSize: '12px',
-                fontWeight: '700',
-              }}>
-                {notificationCount}
-              </span>
-            )}
+            <span>Low Stock Alerts</span>
           </button>
 
           <button

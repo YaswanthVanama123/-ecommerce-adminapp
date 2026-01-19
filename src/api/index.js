@@ -38,8 +38,13 @@ export const categoriesAPI = {
 
 // Analytics APIs
 export const analyticsAPI = {
-  getDashboard: () => axiosInstance.get('/analytics/dashboard'),
-  getRevenue: (period) => axiosInstance.get('/analytics/revenue', { params: { period } }),
+  getDashboard: (params) => axiosInstance.get('/analytics/dashboard', { params }),
+  getSales: (params) => axiosInstance.get('/analytics/sales', { params }),
+  getRevenue: (params) => axiosInstance.get('/analytics/revenue', { params }),
+  getCustomers: (params) => axiosInstance.get('/analytics/customers', { params }),
+  getProducts: (params) => axiosInstance.get('/analytics/products', { params }),
+  getOrders: (params) => axiosInstance.get('/analytics/orders', { params }),
+  clearCache: () => axiosInstance.delete('/analytics/cache'),
   getTopProducts: () => axiosInstance.get('/analytics/top-products'),
 };
 
@@ -79,6 +84,42 @@ export const shippingAPI = {
   getTimeline: (id) => axiosInstance.get(`/shipping/${id}/timeline`),
 };
 
+// Invoices APIs
+export const invoicesAPI = {
+  getAll: (params) => axiosInstance.get('/invoices', { params }),
+  getById: (id) => axiosInstance.get(`/invoices/${id}`),
+  generate: (orderId) => axiosInstance.post('/invoices/generate', { orderId }),
+  download: (id) => axiosInstance.get(`/invoices/${id}/download`, { responseType: 'blob' }),
+  email: (id, email) => axiosInstance.post(`/invoices/${id}/email`, { email }),
+  regenerate: (id) => axiosInstance.post(`/invoices/${id}/regenerate`),
+  bulkDownload: (orderIds) => axiosInstance.post('/invoices/bulk/download', { orderIds }, { responseType: 'blob' }),
+  getStatistics: () => axiosInstance.get('/invoices/statistics'),
+};
+
+// Inventory APIs
+export const inventoryAPI = {
+  // Get inventory overview
+  getOverview: () => axiosInstance.get('/admin/inventory'),
+
+  // Get low stock alerts
+  getLowStockAlerts: () => axiosInstance.get('/admin/inventory/low-stock'),
+
+  // Get inventory history
+  getHistory: (params) => axiosInstance.get('/admin/inventory/history', { params }),
+
+  // Get inventory statistics
+  getStatistics: (params) => axiosInstance.get('/admin/inventory/statistics', { params }),
+
+  // Manual stock adjustment
+  adjustStock: (data) => axiosInstance.post('/admin/inventory/adjust', data),
+
+  // Create reorder
+  createReorder: (data) => axiosInstance.post('/admin/inventory/reorder', data),
+
+  // Bulk stock update
+  bulkUpdate: (updates) => axiosInstance.post('/admin/inventory/bulk-update', { updates }),
+};
+
 export default {
   auth: authAPI,
   products: productsAPI,
@@ -87,4 +128,6 @@ export default {
   analytics: analyticsAPI,
   banners: bannersAPI,
   shipping: shippingAPI,
+  invoices: invoicesAPI,
+  inventory: inventoryAPI,
 };

@@ -9,16 +9,47 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('adminToken');
       const savedUser = localStorage.getItem('adminUser');
 
-      if (token && savedUser) {
+      if (savedUser) {
         try {
+          // Set user from localStorage first for instant UI
           setUser(JSON.parse(savedUser));
+
+          // Then verify with backend (uses cookies for auth)
+          try {
+            const response = await authAPI.getProfile();
+            const freshUser = response.data?.data || response.data;
+            if (freshUser && ['admin', 'superadmin'].includes(freshUser.role)) {
+              setUser(freshUser);
+              localStorage.setItem('adminUser', JSON.stringify(freshUser));
+            } else {
+              throw new Error('Invalid user role');
+            }
+          } catch (verifyError) {
+            // Cookie invalid, clear everything
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            setUser(null);
+          }
         } catch (error) {
           console.error('Error parsing saved user:', error);
           localStorage.removeItem('adminToken');
           localStorage.removeItem('adminUser');
+          setUser(null);
+        }
+      } else {
+        // Try to fetch user from backend (in case cookies exist)
+        try {
+          const response = await authAPI.getProfile();
+          const userData = response.data?.data || response.data;
+          if (userData && ['admin', 'superadmin'].includes(userData.role)) {
+            setUser(userData);
+            localStorage.setItem('adminUser', JSON.stringify(userData));
+          }
+        } catch (error) {
+          // No valid session
+          setUser(null);
         }
       }
       setLoading(false);
@@ -33,13 +64,10 @@ export const AuthProvider = ({ children }) => {
 
       // Handle both response structures: response.data.data and response.data
       const responseData = response.data?.data || response.data;
-      const { token, accessToken, user: userData } = responseData;
-
-      // Use either token or accessToken
-      const authToken = token || accessToken;
+      const { user: userData } = responseData;
 
       // Validate response
-      if (!authToken || !userData) {
+      if (!userData) {
         throw new Error('Invalid response from server');
       }
 
@@ -48,7 +76,12 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Unauthorized. Admin access required.');
       }
 
-      localStorage.setItem('adminToken', authToken);
+      // Store only user data (tokens are in HttpOnly cookies)
+      // Keep adminToken for backward compatibility with Authorization header
+      const legacyToken = responseData.token || responseData.accessToken;
+      if (legacyToken) {
+        localStorage.setItem('adminToken', legacyToken);
+      }
       localStorage.setItem('adminUser', JSON.stringify(userData));
       setUser(userData);
 
@@ -62,10 +95,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear user data (cookies cleared by backend)
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      setUser(null);
+    }
   };
 
   const value = {

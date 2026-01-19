@@ -11,6 +11,7 @@ import Header from './components/common/Header';
 // Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Analytics from './pages/Analytics';
 import ProductList from './pages/Products/ProductList';
 import AddProduct from './pages/Products/AddProduct';
 import EditProduct from './pages/Products/EditProduct';
@@ -18,6 +19,13 @@ import OrderList from './pages/Orders/OrderList';
 import OrderDetail from './pages/Orders/OrderDetail';
 import CategoryManagement from './pages/Categories/CategoryManagement';
 import BannerManagement from './pages/Banners/BannerManagement';
+import ShippingList from './pages/Shipping/ShippingList';
+import UpdateShipping from './pages/Shipping/UpdateShipping';
+import ReturnManagement from './pages/Returns/ReturnManagement';
+import ReturnDetail from './pages/Returns/ReturnDetail';
+import ReviewModeration from './pages/Reviews/ReviewModeration';
+import InvoiceManagement from './pages/Invoices/InvoiceManagement';
+import PaymentManagement from './pages/Payments/PaymentManagement';
 
 const Layout = ({ children }) => {
   const [isMobile, setIsMobile] = React.useState(false);
@@ -109,6 +117,16 @@ function App() {
             }
           />
           <Route
+            path="/analytics"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <Analytics />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/products"
             element={
               <PrivateRoute>
@@ -174,6 +192,76 @@ function App() {
               <PrivateRoute>
                 <Layout>
                   <BannerManagement />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/shipping"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <ShippingList />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/shipping/update/:id"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <UpdateShipping />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/returns"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <ReturnManagement />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/returns/:id"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <ReturnDetail />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/reviews"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <ReviewModeration />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/invoices"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <InvoiceManagement />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/payments"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <PaymentManagement />
                 </Layout>
               </PrivateRoute>
             }

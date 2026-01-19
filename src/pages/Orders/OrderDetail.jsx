@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ordersAPI } from '../../api';
+import { ordersAPI, shippingAPI } from '../../api';
 import { toast } from 'react-toastify';
 import StatusUpdateModal from '../../components/orders/StatusUpdateModal';
 
@@ -8,11 +8,14 @@ const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
+  const [shipping, setShipping] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingShipping, setLoadingShipping] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchOrder();
+    fetchShipping();
   }, [id]);
 
   const fetchOrder = async () => {
@@ -48,6 +51,78 @@ const OrderDetail = () => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
+  };
+
+  const fetchShipping = async () => {
+    try {
+      setLoadingShipping(true);
+      const response = await shippingAPI.getById(id);
+
+      if (response.data?.data) {
+        setShipping(response.data.data);
+      } else if (response.data) {
+        setShipping(response.data);
+      }
+    } catch (error) {
+      console.log('No shipping info found:', error);
+      setShipping(null);
+    } finally {
+      setLoadingShipping(false);
+    }
+  };
+
+  const handleShipOrder = async () => {
+    if (!order) return;
+
+    try {
+      const carrier = prompt('Enter carrier name (bluedart/delhivery/dtdc/fedex/aramex/other):', 'other');
+      if (!carrier) return;
+
+      const response = await shippingAPI.create({
+        orderId: order._id,
+        carrier: carrier.toLowerCase(),
+        estimatedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        weight: 1,
+        notes: 'Shipment created by admin'
+      });
+
+      toast.success('Shipment created successfully!');
+      await fetchShipping();
+      await fetchOrder();
+    } catch (error) {
+      console.error('Error creating shipment:', error);
+      toast.error(error.response?.data?.message || 'Failed to create shipment');
+    }
+  };
+
+  const handleUpdateTracking = () => {
+    if (!shipping) return;
+
+    const trackingNumber = prompt('Enter new tracking number:', shipping.trackingNumber);
+    if (!trackingNumber) return;
+
+    shippingAPI.updateStatus(shipping._id, { trackingNumber })
+      .then(() => {
+        toast.success('Tracking number updated successfully!');
+        fetchShipping();
+      })
+      .catch((error) => {
+        console.error('Error updating tracking:', error);
+        toast.error('Failed to update tracking number');
+      });
+  };
+
+  const getShippingStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      picked_up: 'bg-blue-100 text-blue-800',
+      in_transit: 'bg-indigo-100 text-indigo-800',
+      out_for_delivery: 'bg-purple-100 text-purple-800',
+      delivered: 'bg-green-100 text-green-800',
+      failed: 'bg-red-100 text-red-800',
+      returned: 'bg-gray-100 text-gray-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
   const getStatusStyle = (status) => {
@@ -654,6 +729,310 @@ const OrderDetail = () => {
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Shipping Tracking Card */}
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              padding: '32px',
+              borderRadius: '20px',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '24px',
+                paddingBottom: '16px',
+                borderBottom: '2px solid #f1f5f9'
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px'
+                }}>
+                  🚚
+                </div>
+                <h2 style={{
+                  fontSize: '22px',
+                  fontWeight: 700,
+                  margin: 0,
+                  color: '#1e293b',
+                  letterSpacing: '-0.3px',
+                  flex: 1
+                }}>
+                  Shipping Tracking
+                </h2>
+                {!shipping && !loadingShipping && (
+                  <button
+                    onClick={handleShipOrder}
+                    style={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      padding: '10px 20px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                    onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                  >
+                    Ship Order
+                  </button>
+                )}
+              </div>
+
+              <div style={{
+                backgroundColor: '#ffffff',
+                padding: '24px',
+                borderRadius: '16px',
+                border: '2px solid #f1f5f9'
+              }}>
+                {loadingShipping ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>
+                    Loading shipping information...
+                  </div>
+                ) : shipping ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                    <div>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#64748b',
+                        marginBottom: '8px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        Tracking Number
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <p style={{
+                          fontWeight: 700,
+                          fontSize: '18px',
+                          color: '#1e293b',
+                          margin: 0,
+                          fontFamily: 'monospace'
+                        }}>
+                          {shipping.trackingNumber || order.trackingNumber || 'N/A'}
+                        </p>
+                        <button
+                          onClick={handleUpdateTracking}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#6366f1',
+                            fontSize: '14px',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseOver={(e) => e.target.style.background = '#f1f5f9'}
+                          onMouseOut={(e) => e.target.style.background = 'none'}
+                          title="Update tracking number"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{
+                      borderTop: '1px solid #f1f5f9',
+                      paddingTop: '18px'
+                    }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#64748b',
+                        marginBottom: '10px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        Shipping Status
+                      </p>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        textTransform: 'capitalize',
+                        ...(shipping.status === 'delivered' ?
+                          { backgroundColor: '#dcfce7', color: '#15803d' } :
+                          shipping.status === 'in_transit' || shipping.status === 'out_for_delivery' ?
+                          { backgroundColor: '#dbeafe', color: '#2563eb' } :
+                          shipping.status === 'picked_up' ?
+                          { backgroundColor: '#e0e7ff', color: '#4f46e5' } :
+                          shipping.status === 'failed' || shipping.status === 'returned' ?
+                          { backgroundColor: '#fee2e2', color: '#dc2626' } :
+                          { backgroundColor: '#fef3c7', color: '#d97706' })
+                      }}>
+                        {shipping.status?.replace('_', ' ')}
+                      </span>
+                    </div>
+
+                    <div style={{
+                      borderTop: '1px solid #f1f5f9',
+                      paddingTop: '18px'
+                    }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#64748b',
+                        marginBottom: '8px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        Carrier
+                      </p>
+                      <p style={{
+                        fontWeight: 600,
+                        fontSize: '16px',
+                        color: '#1e293b',
+                        margin: 0,
+                        textTransform: 'capitalize'
+                      }}>
+                        {shipping.carrier || 'Standard Shipping'}
+                      </p>
+                    </div>
+
+                    <div style={{
+                      borderTop: '1px solid #f1f5f9',
+                      paddingTop: '18px'
+                    }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#64748b',
+                        marginBottom: '8px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        Estimated Delivery
+                      </p>
+                      <p style={{
+                        fontWeight: 600,
+                        fontSize: '15px',
+                        color: '#1e293b',
+                        margin: 0
+                      }}>
+                        {shipping.estimatedDeliveryDate ?
+                          new Date(shipping.estimatedDeliveryDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          }) : 'Not available'}
+                      </p>
+                    </div>
+
+                    {shipping.actualDeliveryDate && (
+                      <div style={{
+                        borderTop: '1px solid #f1f5f9',
+                        paddingTop: '18px'
+                      }}>
+                        <p style={{
+                          fontSize: '13px',
+                          color: '#64748b',
+                          marginBottom: '8px',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>
+                          Delivered On
+                        </p>
+                        <p style={{
+                          fontWeight: 600,
+                          fontSize: '15px',
+                          color: '#15803d',
+                          margin: 0
+                        }}>
+                          {new Date(shipping.actualDeliveryDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                    )}
+
+                    <div style={{
+                      marginTop: '12px',
+                      display: 'flex',
+                      gap: '10px'
+                    }}>
+                      <a
+                        href={`/shipping/${shipping._id}`}
+                        style={{
+                          flex: 1,
+                          padding: '12px 16px',
+                          backgroundColor: '#f1f5f9',
+                          color: '#475569',
+                          borderRadius: '10px',
+                          textDecoration: 'none',
+                          textAlign: 'center',
+                          fontWeight: 600,
+                          fontSize: '14px',
+                          transition: 'all 0.2s',
+                          border: '2px solid #e2e8f0'
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.backgroundColor = '#e2e8f0';
+                          e.target.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.backgroundColor = '#f1f5f9';
+                          e.target.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        View Details
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>📦</div>
+                    <p style={{ color: '#64748b', fontSize: '15px', marginBottom: '20px', fontWeight: 500 }}>
+                      No shipping information available
+                    </p>
+                    <button
+                      onClick={handleShipOrder}
+                      style={{
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        padding: '12px 24px',
+                        borderRadius: '10px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '14px',
+                        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.5)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+                      }}
+                    >
+                      Create Shipment
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

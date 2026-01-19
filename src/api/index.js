@@ -55,6 +55,30 @@ export const bannersAPI = {
   }),
 };
 
+// Shipping APIs (Admin specific operations)
+export const shippingAPI = {
+  // Create shipment for an order
+  create: (data) => axiosInstance.post('/shipping', data),
+
+  // Get all shipments (if admin has permission)
+  getAll: (params) => axiosInstance.get('/shipping/admin/shipments', { params }),
+
+  // Get shipment by ID or order ID
+  getById: (id) => axiosInstance.get(`/shipping/order/${id}`),
+
+  // Get shipment by tracking number
+  getByTrackingNumber: (trackingNumber) => axiosInstance.get(`/shipping/track/${trackingNumber}`),
+
+  // Update shipment status
+  updateStatus: (id, statusData) => axiosInstance.put(`/shipping/${id}/status`, statusData),
+
+  // Update tracking information
+  updateTracking: (id, trackingData) => axiosInstance.put(`/shipping/${id}/tracking`, trackingData),
+
+  // Get delivery timeline
+  getTimeline: (id) => axiosInstance.get(`/shipping/${id}/timeline`),
+};
+
 export default {
   auth: authAPI,
   products: productsAPI,
@@ -62,4 +86,5 @@ export default {
   categories: categoriesAPI,
   analytics: analyticsAPI,
   banners: bannersAPI,
+  shipping: shippingAPI,
 };
